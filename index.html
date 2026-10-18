@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
 :root{
   --bg:#131A2A; --panel:#1C2537; --panel2:#232E44; --line:#31405C;
@@ -419,46 +420,59 @@ html[data-theme="light"] .p-el{background:#2F8F4E;border-color:#2F8F4E!important
 
     <section class="view" id="view-spending">
       <h2>Actual spending<span class="jp">実際の支出</span></h2>
-      <div class="card">
-        <h3>➕ Log an expense</h3>
-        <p class="sub">For use in Japan — saved on this phone/browser automatically as you go. Everyone logs on their own device, then use Export below to combine.</p>
+
+      <div class="card" id="spLockCard">
+        <h3>🔒 Enter the family PIN</h3>
+        <p class="sub">Shared expense log — everyone who enters the PIN sees the same live entries, from any device. Ask Si Qi for the PIN if you don't have it.</p>
         <div class="spForm">
-          <input type="date" id="spDate" aria-label="Date">
-          <select id="spCat" aria-label="Category">
-            <option>Food</option>
-            <option>Snow &amp; activities</option>
-            <option>Transport &amp; fuel</option>
-            <option>Cards &amp; shopping</option>
-            <option>Souvenirs</option>
-            <option>Diapers &amp; baby</option>
-            <option>Lodging extras</option>
-            <option>Other</option>
-          </select>
-          <select id="spWho" aria-label="Self or shared">
-            <option value="shared">Shared (family)</option>
-            <option value="self">Self (personal)</option>
-          </select>
-          <select id="spPaidBy" aria-label="Paid by">
-            <option>Gabriel</option>
-            <option>Albert</option>
-            <option>ETC card</option>
-          </select>
-          <input type="number" id="spAmt" min="0" step="1" placeholder="¥ amount" aria-label="Amount in yen">
-          <input type="text" id="spNote" placeholder="Note (optional)" aria-label="Note" maxlength="80">
-          <button class="tbtn acc" id="spAdd" type="button">Add</button>
+          <input type="password" id="spPin" inputmode="numeric" autocomplete="off" placeholder="PIN" aria-label="PIN" style="max-width:140px">
+          <button class="tbtn acc" id="spUnlock" type="button">Unlock</button>
         </div>
+        <p class="sub" id="spPinErr" style="color:var(--plum);display:none;margin-top:6px">Wrong PIN — try again.</p>
       </div>
-      <div id="spToast" class="sp-toast" role="status" aria-live="polite"></div>
-      <div class="card">
-        <h3>📒 Logged so far</h3>
-        <div id="spRows"></div>
-        <div class="btot" style="padding-top:10px"><span>Shared (family) subtotal</span><span class="n" id="spSharedTotal" style="font-size:14px">¥0</span></div>
-        <div class="btot"><span>Self (personal) subtotal</span><span class="n" id="spSelfTotal" style="font-size:14px">¥0</span></div>
-        <div class="btot" style="border-top:1px dashed var(--line);margin-top:4px"><span>All logged spending</span><span class="n" id="spGrandTotal">¥0</span></div>
-        <p class="sub" style="margin-top:9px">¥10,000 ≈ S$90. This is separate from the on-the-ground <b>estimate</b> in the Budget tab — this tab is what you actually spent.</p>
-        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
-          <button class="tbtn" id="spExport" type="button">📋 Export as text</button>
-          <button class="tbtn" id="spClear" type="button" style="border-color:var(--plum);color:var(--plum)">🗑 Clear all (this device)</button>
+
+      <div id="spGated" style="display:none">
+        <div class="card">
+          <h3>➕ Log an expense</h3>
+          <p class="sub" id="spLiveNote">Connecting to the shared log…</p>
+          <div class="spForm">
+            <input type="date" id="spDate" aria-label="Date">
+            <select id="spCat" aria-label="Category">
+              <option>Food</option>
+              <option>Snow &amp; activities</option>
+              <option>Transport &amp; fuel</option>
+              <option>Cards &amp; shopping</option>
+              <option>Souvenirs</option>
+              <option>Diapers &amp; baby</option>
+              <option>Lodging extras</option>
+              <option>Other</option>
+            </select>
+            <select id="spWho" aria-label="Self or shared">
+              <option value="shared">Shared (family)</option>
+              <option value="self">Self (personal)</option>
+            </select>
+            <select id="spPaidBy" aria-label="Paid by">
+              <option>Gabriel</option>
+              <option>Albert</option>
+              <option>ETC card</option>
+            </select>
+            <input type="number" id="spAmt" min="0" step="1" placeholder="¥ amount" aria-label="Amount in yen">
+            <input type="text" id="spNote" placeholder="Note (optional)" aria-label="Note" maxlength="80">
+            <button class="tbtn acc" id="spAdd" type="button">Add</button>
+          </div>
+        </div>
+        <div id="spToast" class="sp-toast" role="status" aria-live="polite"></div>
+        <div class="card">
+          <h3>📒 Logged so far <span style="font-weight:400;font-size:12px;color:var(--dim)">— live, everyone's entries</span></h3>
+          <div id="spRows"></div>
+          <div class="btot" style="padding-top:10px"><span>Shared (family) subtotal</span><span class="n" id="spSharedTotal" style="font-size:14px">¥0</span></div>
+          <div class="btot"><span>Self (personal) subtotal</span><span class="n" id="spSelfTotal" style="font-size:14px">¥0</span></div>
+          <div class="btot" style="border-top:1px dashed var(--line);margin-top:4px"><span>All logged spending</span><span class="n" id="spGrandTotal">¥0</span></div>
+          <p class="sub" style="margin-top:9px">¥10,000 ≈ S$90. This is separate from the on-the-ground <b>estimate</b> in the Budget tab — this tab is what you actually spent.</p>
+          <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+            <button class="tbtn" id="spExport" type="button">📋 Export as text</button>
+            <button class="tbtn" id="spClear" type="button" style="border-color:var(--plum);color:var(--plum)">🗑 Clear all (everyone)</button>
+          </div>
         </div>
       </div>
     </section>
@@ -936,32 +950,30 @@ document.getElementById("btnText").addEventListener("click", function(){
 
 document.getElementById("btnPrint").addEventListener("click", function(){ window.print(); });
 
-/* ============================ SPENDING TRACKER ============================ */
+/* ============================ SPENDING TRACKER (shared, live, Supabase) ============================ */
 (function(){
-  var LS_KEY = "nagoyaSpending2026";
+  var SPENDING_PIN = "1023";
+  var UNLOCK_KEY = "nagoyaSpendingUnlocked";
+  var SUPA_URL = "https://hlttfppvgvmnumgkkiys.supabase.co";
+  var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsdHRmcHB2Z3ZtbnVtZ2traXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzU4MDQsImV4cCI6MjEwNzkxMTgwNH0.h2KzoIRYZz0-agXc3e-QHid_Xc_E5hCJ5K0w8YkAD1Y";
+
+  var lockCard = document.getElementById("spLockCard"), gated = document.getElementById("spGated"),
+      pinEl = document.getElementById("spPin"), pinErrEl = document.getElementById("spPinErr"),
+      unlockBtn = document.getElementById("spUnlock");
   var rowsEl = document.getElementById("spRows");
   var dateEl = document.getElementById("spDate"), catEl = document.getElementById("spCat"),
       whoEl = document.getElementById("spWho"), paidByEl = document.getElementById("spPaidBy"),
       amtEl = document.getElementById("spAmt"), noteEl = document.getElementById("spNote"),
-      toastEl = document.getElementById("spToast");
+      toastEl = document.getElementById("spToast"), liveNoteEl = document.getElementById("spLiveNote");
   var entries = [];
+  var sb = null, started = false;
   var toastTimer = null;
+
   function toast(msg){
     toastEl.textContent = msg;
     toastEl.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2200);
-  }
-
-  function load(){
-    try {
-      var raw = localStorage.getItem(LS_KEY);
-      entries = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(entries)) entries = [];
-    } catch (e){ entries = []; }
-  }
-  function save(){
-    try { localStorage.setItem(LS_KEY, JSON.stringify(entries)); } catch (e){ /* storage unavailable — keep working in-memory */ }
   }
   function todayStr(){
     var t = new Date(); var p = function(n){ return (n<10?"0":"")+n; };
@@ -973,12 +985,15 @@ document.getElementById("btnPrint").addEventListener("click", function(){ window
     var d = new Date(+parts[0], +parts[1]-1, +parts[2]);
     return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
   }
+  function rowFromDb(r){
+    return { id: r.id, date: r.entry_date, cat: r.category, who: r.who, paidBy: r.paid_by, amt: +r.amount, note: r.note || "" };
+  }
 
   function render(){
     if (!entries.length){
       rowsEl.innerHTML = '<div class="sp-empty">Nothing logged yet — add your first expense above.</div>';
     } else {
-      var sorted = entries.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||"") || a.ts - b.ts; });
+      var sorted = entries.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
       rowsEl.innerHTML = sorted.map(function(e){
         return '<div class="sp-row" data-id="' + e.id + '">' +
           '<div class="sp-main">' +
@@ -1002,54 +1017,116 @@ document.getElementById("btnPrint").addEventListener("click", function(){ window
     document.getElementById("spGrandTotal").textContent = "¥" + fmt(shared + self) + "  ·  ≈ S$" + fmt(Math.round((shared+self)*YEN_RATE));
   }
 
-  document.getElementById("spAdd").addEventListener("click", function(){
-    var amt = Math.round(+amtEl.value || 0);
-    if (!amt){ amtEl.focus(); return; }
-    var entry = {
-      id: Date.now() + "-" + Math.random().toString(36).slice(2,7),
-      ts: Date.now(),
-      date: dateEl.value || todayStr(),
-      cat: catEl.value,
-      who: whoEl.value,
-      paidBy: paidByEl.value,
-      amt: amt,
-      note: (noteEl.value || "").trim()
-    };
-    entries.push(entry);
-    save(); render();
-    toast("Added ¥" + fmt(amt) + " — " + entry.cat + " (" + entry.paidBy + ")");
-    amtEl.value = ""; noteEl.value = ""; amtEl.focus();
-  });
+  async function loadFromDb(){
+    try {
+      var res = await sb.from("expenses").select("*").order("entry_date", { ascending: true });
+      if (res.error) throw res.error;
+      entries = (res.data || []).map(rowFromDb);
+      liveNoteEl.textContent = "Live — shared with everyone who has the PIN. Updates on other phones show up here automatically.";
+      render();
+    } catch (err){
+      liveNoteEl.textContent = "Couldn't reach the shared log — check your connection and reload.";
+      toast("Network error loading entries");
+    }
+  }
 
-  rowsEl.addEventListener("click", function(e){
-    var btn = e.target.closest(".del"); if (!btn) return;
-    var row = btn.closest(".sp-row"); if (!row) return;
-    entries = entries.filter(function(en){ return en.id !== row.dataset.id; });
-    save(); render();
-  });
+  function initSpending(){
+    if (started) return;
+    started = true;
+    if (!window.supabase){
+      liveNoteEl.textContent = "Couldn't load the shared log (connection library failed to load). Try reloading the page.";
+      return;
+    }
+    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    dateEl.value = todayStr();
+    loadFromDb();
+    sb.channel("expenses-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "expenses" }, function(){ loadFromDb(); })
+      .subscribe();
 
-  document.getElementById("spExport").addEventListener("click", function(){
-    var sorted = entries.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||"") || a.ts - b.ts; });
-    var lines = ["NAGOYA & HIDA — actual spending log", ""];
-    sorted.forEach(function(e){
-      lines.push(fmtDate(e.date) + "  ¥" + fmt(e.amt) + "  [" + (e.who==="self"?"self":"shared") + "]  " + e.cat + "  paid by " + (e.paidBy || "—") + (e.note ? "  — " + e.note : ""));
+    document.getElementById("spAdd").addEventListener("click", async function(){
+      var amt = Math.round(+amtEl.value || 0);
+      if (!amt){ amtEl.focus(); return; }
+      var entry = {
+        entry_date: dateEl.value || todayStr(),
+        category: catEl.value,
+        who: whoEl.value,
+        paid_by: paidByEl.value,
+        amount: amt,
+        note: (noteEl.value || "").trim()
+      };
+      try {
+        var res = await sb.from("expenses").insert(entry);
+        if (res.error) throw res.error;
+        toast("Added ¥" + fmt(amt) + " — " + entry.category + " (" + entry.paid_by + ")");
+        amtEl.value = ""; noteEl.value = ""; amtEl.focus();
+        loadFromDb();
+      } catch (err){
+        toast("Couldn't save — check your connection and try again");
+      }
     });
-    var shared = 0, self = 0;
-    entries.forEach(function(e){ if (e.who === "self") self += e.amt; else shared += e.amt; });
-    lines.push("", "Shared subtotal: ¥" + fmt(shared), "Self subtotal: ¥" + fmt(self), "Total: ¥" + fmt(shared+self) + " (≈ S$" + fmt(Math.round((shared+self)*YEN_RATE)) + ")");
-    ioText.value = lines.join("\n");
-    ioMsg.textContent = entries.length ? "Spending log as text — tap Copy, then paste/merge into one person's tracker." : "Nothing logged yet.";
-    ioBox.classList.add("open");
-  });
 
-  document.getElementById("spClear").addEventListener("click", function(){
-    if (!entries.length) return;
-    if (!confirm("Clear all " + entries.length + " logged entries on this device? This can't be undone.")) return;
-    entries = []; save(); render();
-  });
+    rowsEl.addEventListener("click", async function(e){
+      var btn = e.target.closest(".del"); if (!btn) return;
+      var row = btn.closest(".sp-row"); if (!row) return;
+      try {
+        var res = await sb.from("expenses").delete().eq("id", row.dataset.id);
+        if (res.error) throw res.error;
+        loadFromDb();
+      } catch (err){
+        toast("Couldn't delete — check your connection and try again");
+      }
+    });
 
-  dateEl.value = todayStr();
-  load(); render();
+    document.getElementById("spExport").addEventListener("click", function(){
+      var sorted = entries.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+      var lines = ["NAGOYA & HIDA — actual spending log", ""];
+      sorted.forEach(function(e){
+        lines.push(fmtDate(e.date) + "  ¥" + fmt(e.amt) + "  [" + (e.who==="self"?"self":"shared") + "]  " + e.cat + "  paid by " + (e.paidBy || "—") + (e.note ? "  — " + e.note : ""));
+      });
+      var shared = 0, self = 0;
+      entries.forEach(function(e){ if (e.who === "self") self += e.amt; else shared += e.amt; });
+      lines.push("", "Shared subtotal: ¥" + fmt(shared), "Self subtotal: ¥" + fmt(self), "Total: ¥" + fmt(shared+self) + " (≈ S$" + fmt(Math.round((shared+self)*YEN_RATE)) + ")");
+      ioText.value = lines.join("\n");
+      ioMsg.textContent = entries.length ? "Spending log as text — tap Copy to share." : "Nothing logged yet.";
+      ioBox.classList.add("open");
+    });
+
+    document.getElementById("spClear").addEventListener("click", async function(){
+      if (!entries.length) return;
+      if (!confirm("Clear all " + entries.length + " logged entries for EVERYONE? This can't be undone.")) return;
+      try {
+        var res = await sb.from("expenses").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        if (res.error) throw res.error;
+        loadFromDb();
+      } catch (err){
+        toast("Couldn't clear — check your connection and try again");
+      }
+    });
+  }
+
+  function unlock(){
+    lockCard.style.display = "none";
+    gated.style.display = "";
+    initSpending();
+  }
+
+  function tryPin(){
+    if ((pinEl.value || "").trim() === SPENDING_PIN){
+      try { localStorage.setItem(UNLOCK_KEY, "1"); } catch (e){}
+      pinErrEl.style.display = "none";
+      unlock();
+    } else {
+      pinErrEl.style.display = "";
+      pinEl.value = ""; pinEl.focus();
+    }
+  }
+  unlockBtn.addEventListener("click", tryPin);
+  pinEl.addEventListener("keydown", function(e){ if (e.key === "Enter") tryPin(); });
+
+  var alreadyUnlocked = false;
+  try { alreadyUnlocked = localStorage.getItem(UNLOCK_KEY) === "1"; } catch (e){}
+  if (alreadyUnlocked) unlock();
 })();
 
 /* boot */
