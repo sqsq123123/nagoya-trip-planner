@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Nagoya & Hida · Trip Planner (editable) · Dec 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#131A2A; --panel:#1C2537; --panel2:#232E44; --line:#31405C;
+  --fg:#EDF2F9; --dim:#8FA0BC; --gold:#F2B24C; --plum:#E4657A; --teal:#5CC8C2;
+  --on-gold:#3A2A08; --strong:#FFFFFF; --bar:rgba(19,26,42,.94); --edit:rgba(92,200,194,.10);
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',system-ui,sans-serif; --maru:'Zen Maru Gothic',sans-serif;
+}
+html[data-theme="light"]{
+  --bg:#F1F5FA; --panel:#FFFFFF; --panel2:#E8EFF8; --line:#D1DDEB;
+  --fg:#17212F; --dim:#5B6D85; --gold:#9E6B0C; --plum:#BC3651; --teal:#0E7A75;
+  --on-gold:#FFFFFF; --strong:#0B131F; --bar:rgba(241,245,250,.95); --edit:rgba(14,122,117,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;
+  padding-bottom:92px;transition:background-color .3s,color .3s;
+  background-image:radial-gradient(circle at 85% -5%,rgba(242,178,76,.10),transparent 45%)}
+.app{max-width:620px;margin:0 auto}
+a{color:var(--teal)}
+button{font-family:inherit}
+
+/* ---------- header ---------- */
+.top{padding:18px 16px 10px}
+.tophead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+h1{font-family:var(--maru);font-weight:900;font-size:22px;margin-top:3px}
+h1 .jp{color:var(--gold);font-size:14px;margin-left:7px;letter-spacing:.16em}
+.iconbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel);
+  color:var(--gold);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.iconbtn:hover{border-color:var(--gold)}
+.iconbtn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+.editnote{margin:10px 16px 0;background:var(--panel2);border:1px dashed var(--line);border-radius:10px;
+  padding:9px 12px;font-size:11.5px;color:var(--dim)}
+.editnote b{color:var(--gold)}
+
+/* ---------- toolbar ---------- */
+.tools{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px 4px}
+.tbtn{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:9px;
+  padding:7px 11px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.tbtn:hover{border-color:var(--teal);color:var(--teal)}
+.tbtn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.tbtn.acc{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.tbtn.acc:hover{filter:brightness(1.08);color:var(--on-gold)}
+
+/* ---------- map search ---------- */
+.msearch{margin:12px 16px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 13px}
+.msearch h3{font-family:var(--maru);font-size:13px;color:var(--gold);margin-bottom:8px}
+.msrow{display:flex;gap:7px}
+.msrow input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--fg);
+  border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px}
+.msrow input:focus{outline:2px solid var(--teal);outline-offset:-1px}
+.msadd{display:flex;gap:7px;align-items:center;margin-top:8px;font-size:11.5px;color:var(--dim);flex-wrap:wrap}
+.msadd select{background:var(--panel2);border:1px solid var(--line);color:var(--fg);border-radius:7px;
+  padding:5px 7px;font-family:inherit;font-size:11.5px}
+
+/* ---------- date strip ---------- */
+.strip{display:flex;gap:7px;overflow-x:auto;padding:12px 16px 6px;scrollbar-width:none;position:sticky;top:0;z-index:40;
+  background:linear-gradient(to bottom,var(--bg) 84%,transparent)}
+.strip::-webkit-scrollbar{display:none}
+.dbtn{flex:0 0 auto;width:54px;border:1px solid var(--line);background:var(--panel);color:var(--dim);
+  border-radius:13px;padding:7px 0;text-align:center;cursor:pointer;font-family:var(--mono)}
+.dbtn .yb{display:block;font-family:var(--maru);font-weight:700;font-size:10.5px;color:var(--teal)}
+.dbtn .dd{display:block;font-size:16px;font-weight:600;color:var(--fg)}
+.dbtn.active{background:var(--gold);border-color:var(--gold)}
+.dbtn.active .yb,.dbtn.active .dd{color:var(--on-gold)}
+.dbtn.today:not(.active){box-shadow:0 0 0 1px var(--gold) inset}
+.dbtn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* ---------- day panel ---------- */
+.panel{padding:6px 16px 16px}
+.dhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.dnum{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--plum);font-weight:600}
+.ddate{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+.dtot{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--gold)}
+h2.dtitle{font-family:var(--maru);font-weight:900;font-size:20px;margin:4px 0 12px;line-height:1.28}
+
+.stop{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:9px}
+.srow1{display:flex;gap:9px;align-items:center}
+.stime{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--gold);min-width:44px}
+.splace{flex:1;min-width:0;font-weight:600;font-size:14px;color:var(--strong)}
+.sbtns{display:flex;gap:5px;flex:0 0 auto}
+.mini{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);
+  color:var(--dim);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.mini:hover{border-color:var(--teal);color:var(--teal)}
+.mini:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.mini.del:hover{border-color:var(--plum);color:var(--plum)}
+.snote{font-size:13px;color:var(--fg);margin-top:6px}
+.scost{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:5px;display:inline-block}
+
+[contenteditable]{border-radius:5px;padding:1px 3px;margin:-1px -3px;outline:none;
+  transition:background .15s,box-shadow .15s}
+[contenteditable]:hover{background:var(--edit)}
+[contenteditable]:focus{background:var(--edit);box-shadow:0 0 0 2px var(--teal)}
+[contenteditable]:empty::before{content:attr(data-ph);color:var(--dim);opacity:.6}
+
+.addstop{width:100%;border:1px dashed var(--line);background:none;color:var(--dim);border-radius:11px;
+  padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;margin-top:2px}
+.addstop:hover{border-color:var(--teal);color:var(--teal)}
+.staybox{margin-top:11px;background:var(--panel2);border:1px dashed var(--line);border-radius:11px;padding:10px 12px;font-size:12.5px;color:var(--dim)}
+.staybox b{color:var(--teal)}
+
+/* ---------- tabs / views ---------- */
+.view{display:none;padding:8px 16px 16px}
+.view.active{display:block}
+.view h2{font-family:var(--maru);font-weight:900;font-size:19px;margin:6px 0 11px}
+.view h2 .jp{color:var(--gold);font-size:12px;margin-left:7px;letter-spacing:.14em}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:11px}
+.card h3{font-family:var(--maru);font-weight:700;font-size:14.5px;margin-bottom:3px;color:var(--gold)}
+.card .sub{font-size:11.5px;color:var(--dim);margin-bottom:9px}
+.line{display:flex;gap:9px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.line:last-child{border-bottom:none}
+.line .k{flex:0 0 74px;font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--dim);
+  text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
+.line .v b{color:var(--strong)}
+.line .v .m{font-size:11.5px;color:var(--dim)}
+
+/* budget */
+.brow{display:flex;gap:9px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.brow .bl{flex:1;font-size:13px}
+.brow .bv{width:104px;flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);color:var(--fg);
+  border-radius:7px;padding:5px 8px;font-family:var(--mono);font-size:12px;text-align:right}
+.brow .bv:focus{outline:2px solid var(--teal);outline-offset:-1px}
+.btot{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;font-family:var(--maru);font-weight:700}
+.btot .n{font-family:var(--mono);color:var(--gold);font-size:16px}
+
+/* checks */
+.ck label{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.ck label:last-of-type{border-bottom:none}
+.ck input{margin-top:3px;width:16px;height:16px;accent-color:var(--gold);flex:0 0 auto}
+.ck input:checked + span{color:var(--dim);text-decoration:line-through}
+
+/* spending tracker */
+.spForm{display:flex;flex-wrap:wrap;gap:8px}
+.spForm input,.spForm select{background:var(--panel2);border:1px solid var(--line);color:var(--fg);
+  border-radius:9px;padding:9px 10px;font-size:13px;font-family:inherit}
+.spForm input[type="date"]{flex:1 1 128px}
+.spForm select{flex:1 1 140px}
+.spForm input[type="number"]{flex:1 1 100px}
+.spForm input[type="text"]{flex:2 1 160px}
+.spForm button{flex:0 0 auto}
+.sp-row{display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.sp-row:last-child{border-bottom:none}
+.sp-main{flex:1;min-width:0}
+.sp-top{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap}
+.sp-date{font-family:var(--mono);color:var(--dim);font-size:10.5px}
+.sp-cat{font-weight:700}
+.sp-badge{font-size:9.5px;font-weight:700;border-radius:5px;padding:1.5px 6px;text-transform:uppercase;letter-spacing:.03em}
+.sp-badge.shared{background:rgba(92,200,194,.18);color:var(--teal)}
+.sp-badge.self{background:rgba(228,101,122,.18);color:var(--plum)}
+.sp-note{color:var(--dim);font-size:11.5px;margin-top:1px}
+.sp-amt{font-family:var(--mono);color:var(--gold);font-size:14px;flex:0 0 auto;white-space:nowrap}
+.sp-empty{color:var(--dim);font-size:12.5px;padding:10px 0;text-align:center}
+.sp-paidby{font-size:9.5px;font-weight:700;color:var(--dim);border:1px solid var(--line);border-radius:5px;padding:1.5px 6px}
+.sp-toast{position:fixed;left:50%;bottom:78px;transform:translate(-50%,12px);background:var(--panel);
+  border:1px solid var(--teal);color:var(--fg);border-radius:11px;padding:10px 16px;font-size:13px;
+  font-family:var(--maru);font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:50;
+  opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;white-space:nowrap}
+.sp-toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* seat maps */
+.sm-legend{display:flex;flex-wrap:wrap;gap:5px 11px;margin-bottom:12px}
+.sm-key{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--dim)}
+.sm-key i{font-style:normal;font-weight:700;font-size:8.5px;color:#fff;border-radius:4px;padding:2.5px 4px}
+.sm-card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:11px}
+.sm-top{display:flex;align-items:baseline;gap:7px}
+.sm-top b{font-size:13.5px;color:var(--gold)}
+.sm-route,.sm-sub{font-size:11px;color:var(--dim)}
+.sm-nose{font-size:9px;color:var(--dim);opacity:.75;margin:8px 0 3px;text-align:center;letter-spacing:.06em}
+.sm-cabin{display:grid;gap:3px}
+.sm-c11{grid-template-columns:16px repeat(2,1fr) 8px repeat(4,1fr) 8px repeat(2,1fr)}
+.sm-c8{grid-template-columns:16px repeat(3,1fr) 8px repeat(3,1fr)}
+.sm-hd{font-size:9px;font-weight:600;color:var(--dim);text-align:center}
+.sm-rn{font-size:9.5px;font-weight:600;color:var(--dim);display:flex;align-items:center;justify-content:flex-end;padding-right:3px}
+.sm-seat{aspect-ratio:7/5.6;min-height:20px;border:1px solid var(--line);border-radius:4px;display:flex;
+  align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+.sm-note{font-size:10.5px;color:var(--teal);margin-top:8px;font-style:italic}
+.p-sq{background:#5B85C4;border-color:#5B85C4!important}
+.p-ga{background:#34A79B;border-color:#34A79B!important}
+.p-al{background:#9B7CD0;border-color:#9B7CD0!important}
+.p-sa{background:#C77A50;border-color:#C77A50!important}
+.p-na{background:#DB5F55;border-color:#DB5F55!important}
+.p-ra{background:#CE9A34;border-color:#CE9A34!important}
+.p-el{background:#3EA866;border-color:#3EA866!important}
+html[data-theme="light"] .p-sq{background:#33527B;border-color:#33527B!important}
+html[data-theme="light"] .p-ga{background:#2E7D74;border-color:#2E7D74!important}
+html[data-theme="light"] .p-al{background:#7A5CA8;border-color:#7A5CA8!important}
+html[data-theme="light"] .p-sa{background:#B0603E;border-color:#B0603E!important}
+html[data-theme="light"] .p-na{background:#C4423B;border-color:#C4423B!important}
+html[data-theme="light"] .p-ra{background:#C1801F;border-color:#C1801F!important}
+html[data-theme="light"] .p-el{background:#2F8F4E;border-color:#2F8F4E!important}
+
+/* tab bar */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--bar);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);padding:7px 0 calc(9px + env(safe-area-inset-bottom))}
+.tabbar-in{max-width:620px;margin:0 auto;display:flex}
+.tab{flex:1;background:none;border:none;color:var(--dim);font-family:var(--maru);font-weight:700;font-size:10.5px;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0}
+.tab .ic{font-size:16px;line-height:1}
+.tab.active{color:var(--gold)}
+.tab:focus-visible{outline:2px solid var(--teal);outline-offset:-2px;border-radius:8px}
+
+.io{margin:0 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px;display:none}
+.io.open{display:block}
+.io textarea{width:100%;height:130px;background:var(--panel2);border:1px solid var(--line);color:var(--fg);
+  border-radius:8px;padding:9px;font-family:var(--mono);font-size:10.5px;resize:vertical}
+.io p{font-size:11.5px;color:var(--dim);margin-bottom:8px}
+
+@media print{
+  .tabbar,.strip,.tools,.msearch,.editnote,.iconbtn,.sbtns,.addstop,.io{display:none!important}
+  body{background:#fff;color:#000;padding:0}
+  .view{display:block!important}
+  .stop,.card,.sm-card{break-inside:avoid;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="tophead">
+      <div>
+        <div class="kicker">Editable planner · E2HTUJ</div>
+        <h1>Nagoya & Hida<span class="jp">冬の旅</span></h1>
+      </div>
+      <button class="iconbtn" id="themebtn" type="button" aria-label="Switch light or dark">☀️</button>
+    </div>
+  </header>
+
+  <div class="editnote">
+    Every time, place, note and cost below is <b>editable</b> — just tap and type. Edits live in this page only, so
+    use <b>Save file</b> before closing, and <b>Load file</b> to pick up where you left off.
+  </div>
+
+  <div class="tools">
+    <button class="tbtn acc" id="btnSave">💾 Save file</button>
+    <button class="tbtn" id="btnLoad">📂 Load file</button>
+    <button class="tbtn" id="btnText">📋 Copy as text</button>
+    <button class="tbtn" id="btnPrint">🖨 Print / PDF</button>
+    <input type="file" id="fileIn" accept=".json,application/json" hidden>
+  </div>
+
+  <div class="io" id="ioBox">
+    <p id="ioMsg"></p>
+    <textarea id="ioText" spellcheck="false"></textarea>
+    <div class="tools" style="padding:9px 0 0">
+      <button class="tbtn" id="ioCopy">Copy</button>
+      <button class="tbtn" id="ioApply">Apply pasted data</button>
+      <button class="tbtn" id="ioClose">Close</button>
+    </div>
+  </div>
+
+  <div class="msearch">
+    <h3>📍 Find a place on Google Maps</h3>
+    <div class="msrow">
+      <input id="q" type="search" placeholder="e.g. カードショップ 名古屋, ramen Takayama, coin laundry" aria-label="Search Google Maps">
+      <button class="tbtn acc" id="btnQ">Search</button>
+    </div>
+    <div class="msadd">
+      <span>or add it as a stop on</span>
+      <select id="qday" aria-label="Choose a day"></select>
+      <button class="tbtn" id="btnQAdd">+ Add stop</button>
+    </div>
+  </div>
+
+  <nav class="strip" id="strip" aria-label="Choose a day"></nav>
+
+  <main>
+    <section class="view active" id="view-days"><div class="panel" id="panel"></div></section>
+
+    <section class="view" id="view-flights">
+      <h2>Flights & seats<span class="jp">座席</span></h2>
+      <div class="card">
+        <h3>Cathay Pacific · E2HTUJ</h3>
+        <p class="sub">7 passengers · Economy Light (Class Q) · 1 × 23kg checked + 1 × 7kg cabin each</p>
+        <div class="line"><span class="k">Out</span><div class="v"><b>Thu 10 Dec</b> · CX658 SIN 10:00 → HKG 14:00<div class="m">CX532 HKG 16:25 → NGO 21:00 · 2h25 connection · total 10h00</div></div></div>
+        <div class="line"><span class="k">Back</span><div class="v"><b>Wed 23 Dec</b> · CX563 NGO 09:35 → HKG 13:30<div class="m">CX657 HKG 16:05 → SIN 20:10 · 2h35 connection · total 11h35</div></div></div>
+        <div class="line"><span class="k">Check-in</span><div class="v">Opens <b>48 hours before</b> — seat changes are free then<div class="m">Reminders: 8 Dec (outbound) · 21 Dec (return)</div></div></div>
+        <div class="line"><span class="k">Fare</span><div class="v"><b>SGD 3,702.20</b> paid on Visa ****2311<div class="m">Change SGD 100/75 · cancel SGD 300/225 per adult/child</div></div></div>
+        <span class="tbtn" style="margin-top:11px;opacity:.6;cursor:default">📄 Flight details + seat map PDF — in the file sent to you, not hosted publicly</span>
+      </div>
+      <div class="card" style="border-left:4px solid var(--plum)">
+        <h3 style="color:var(--plum)">⚠ Seat reassignment — CX658, 11 Sep</h3>
+        <p class="sub">Cathay moved all 7 seats on the outbound SIN→HKG leg. The other three flights are unaffected.</p>
+        <div class="line"><span class="k">New seats</span><div class="v">Nathaniel 39D · Si Qi 39E · Raphael 39F · Gabriel 39G (middle four, together)<div class="m">Sally 41A · Albert 41C (paired, one row up) · <b>Elijah 40C — alone</b>, separated from Mum</div></div></div>
+        <div class="line"><span class="k">Fix it</span><div class="v">Online check-in opens 48h before (8 Dec) — free seat changes then<div class="m">Or call Cathay now to request Elijah beside Si Qi before check-in opens</div></div></div>
+      </div>
+      <div class="card">
+        <h3>Seat map</h3>
+        <p class="sub">Front of the aircraft is at the top. CX658 (below) reflects the 11 Sep reassignment — Elijah is currently split from Mum on that leg only.</p>
+        <div id="seatmaps"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-budget">
+      <h2>Budget<span class="jp">予算</span></h2>
+      <div class="card" style="border-left:4px solid var(--plum)">
+        <h3 style="font-family:var(--maru);font-size:14px;color:var(--plum);margin-bottom:3px">⚠ Duplicate booking — money at risk</h3>
+        <p class="sub">Not counted in the trip total below — this is paid but shouldn't exist. Cancel it.</p>
+        <div id="atRiskRows"></div>
+        <div class="btot" style="color:var(--plum)"><span>At risk</span><span class="n" id="risktotal" style="color:var(--plum)">—</span></div>
+      </div>
+      <div class="card">
+        <h3 style="font-family:var(--maru);font-size:14px;color:var(--gold);margin-bottom:3px">Already booked & paid (SGD)</h3>
+        <p class="sub">The big fixed costs — flights, villa, airport hotel, car.</p>
+        <div id="prepaidRows"></div>
+        <div class="btot"><span>Prepaid subtotal</span><span class="n" id="ptotal">—</span></div>
+      </div>
+      <div class="card" style="border-left:4px solid var(--indigo)">
+        <h3 style="font-family:var(--maru);font-size:14px;color:var(--indigo);margin-bottom:3px">💳 UOB Lady's Card — maximise the Travel bonus</h3>
+        <p class="sub">Category selected: Travel. Not financial advice — verify against the UOB TMRW app.</p>
+        <div class="line"><span class="k">Mechanics</span><div class="v">4 mpd on Travel spend, up to <b>S$1,000/month</b> — beyond that, only 0.4 mpd<div class="m">Cap is calendar-month, based on posting date (not charge date) · resets on the 1st · 6–10 mpd possible if paired with a UOB Lady's Savings Account (S$10K–100K balance tiers)</div></div></div>
+        <div class="line"><span class="k">Airbnb ✓</span><div class="v">Codes as MCC 7011 — explicitly confirmed by UOB as qualifying for Travel<div class="m">Nagoya Airbnb charge (S$2,022.67) is now paid — check it posted correctly</div></div></div>
+        <div class="line"><span class="k">Trip.com ⚠</span><div class="v">Codes as MCC 4722 — on UOB's qualifying list, but documented cases of UOB rejecting it anyway<div class="m">Covers Four Points (S$553.77 + S$446.46) + Alphard (S$1,381.57, already charged) — verify the first Four Points charge posts correctly before assuming the rest will</div></div></div>
+        <div class="line"><span class="k">Dec note</span><div class="v">The two Four Points charges now total <b>S$1,000.23</b> — just S$0.23 over the cap<div class="m">Immaterial on its own, but if anything else lands on Travel spend in December, that extra will earn only the base 0.4 mpd</div></div></div>
+        <div class="line"><span class="k">The move</span><div class="v">Villa (S$3,280.47, due 28 Nov) still blows past the S$1,000 cap on its own — Airbnb (S$2,022.67) is already paid<div class="m">If Villa’s payment timing is flexible, that’s now the only one worth pushing to its own calendar month for a fresh cap</div></div></div>
+      </div>
+      <div class="card">
+        <h3 style="font-family:var(--maru);font-size:14px;color:var(--gold);margin-bottom:3px">On-the-ground spending (¥)</h3>
+        <p class="sub">Editable — type over any figure in ¥ thousands and the total updates. Excludes the boys' card budget.</p>
+        <div id="budgetRows"></div>
+        <div class="btot"><span>Yen subtotal</span><span class="n" id="btotal">—</span></div>
+        <p class="sub" style="margin-top:9px">¥10,000 ≈ S$90.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--gold)">
+        <div class="btot" style="padding-top:0"><span>Trip total (all-in)</span><span class="n" id="grandtotal">—</span></div>
+        <p class="sub" style="margin-top:6px">Prepaid SGD + on-ground yen, for the whole family of 7. Excludes shopping, cards, and the at-risk duplicate above.</p>
+      </div>
+    </section>
+
+
+    <section class="view" id="view-logistics">
+      <h2>Luggage & wash<span class="jp">荷物</span></h2>
+      <div class="card">
+        <h3>🏠 Booked stays</h3>
+        <div class="line"><span class="k">Dec 10–11</span><div class="v"><b>Four Points by Sheraton Centrair</b> ✓ 3 rooms, breakfast incl.<div class="m">S$553.77 total · confirmation on file · PIN on file · Trip.com booking on file · guests Sally + Si Qi + Gabriel</div></div></div>
+        <div class="line"><span class="k">Dec 22–23</span><div class="v"><b>Four Points by Sheraton Centrair</b> ✓ 3 rooms, <b>no breakfast</b><div class="m">S$446.46 total · confirmation on file · PIN on file · Trip.com booking on file · guests Sally + Si Qi + Gabriel</div></div></div>
+        <div class="line"><span class="k">⚠ Verify</span><div class="v">Round 2 (2-room) is confirmed cancelled by email (18 Oct) — round 1 (3-room) is still unconfirmed<div class="m">Check Trip.com that round 1 (booking refs on file) shows CANCELLED — otherwise you have 6 rooms/night, not 3</div></div></div>
+        <div class="line"><span class="k">Dec 11–18</span><div class="v"><b>SHIRO HOUSE</b> — designer villa, Takayama ✓<div class="m">389-1 Nyūkawachō Machikata · check-in 15:00 / out 11:00 · 7 nights · SGD 3,280.47 · conf HMWW3YY2W4 · host Nanami +81 90-5862-7733 · 4 free bikes · free cancel to 6 Dec</div></div></div>
+        <div class="line"><span class="k">Dec 18–22</span><div class="v"><b>Nagoya Airbnb</b> — Atsuta Ward ✓ paid<div class="m">456-0058 Rokuban-2 Chome-9, Atsuta Ward, Nagoya · check-in after 16:00 / out by 10:00 · 4 nights · SGD 2,022.67 (paid) · conf HMT3MJBMNB · host Masanari +81 90-7957-8519 · 2 parking spots · 6-min walk to subway, no transfer to Sakae</div></div></div>
+        <span class="tbtn" style="margin-top:11px;opacity:.6;cursor:default">📄 Hotel + car vouchers PDF — in the file sent to you, not hosted publicly</span>
+      </div>
+      <div class="card" style="border-left:4px solid var(--teal)">
+        <h3 style="color:var(--teal)">✓ Car rental — one booking, confirmed</h3>
+        <p class="sub">RDZ cancelled. Confirmed as a Toyota Alphard (Gen 2 or similar).</p>
+        <div class="line"><span class="k">Alphard</span><div class="v"><b>carelife rent a car</b> (Zy Rent A Car, Chubu Centrair) — Toyota Alphard Gen 2 or similar, 8 seats<div class="m">Dec 11 10:00 → Dec 22 18:30 (12 days) · SGD 1,381.57 (rental S$1,118.22 + TripCover S$263.35) · PIN on file · Trip.com booking on file</div></div></div>
+        <div class="line"><span class="k">Extras</span><div class="v">1 additional driver · snow tyres · GPS · child seat — all included in this booking</div></div>
+        <div class="line"><span class="k">Docs</span><div class="v">Passport + Japan licence, or original licence + 1949-Geneva IDP<div class="m">Cash accepted in JPY; no deposit required at this branch</div></div></div>
+      </div>
+      <div class="card">
+        <h3>🚚 Luggage plan — no Airbnb forwarding</h3>
+        <p class="sub">Neither stay processes takkyubin, so every forward is a self-drive errand to a Yamato service centre (28"+ cases exceed the konbini 160cm limit). The Alphard holds ~4 large behind the 3rd row, and with 7 aboard the boot is the bottleneck.</p>
+        <div class="line"><span class="k">In car</span><div class="v"><b>2 of Si Qi & Gabriel's cases + 1 of Sally & Albert's</b> — soft duffels ride best<div class="m">Card boxes / sealed product / valuables stay with you, never forwarded</div></div></div>
+        <div class="line"><span class="k">Forward</span><div class="v"><b>3 dirty-clothes cases</b> (Si Qi & Gabriel's) + whichever of Sally & Albert's is full<div class="m">See the two cards below for exactly when each person forwards</div></div></div>
+        <div class="line"><span class="k">Relay</span><div class="v">Takayama → Nagoya apartment (Dec 18), then Nagoya → Centrair (Dec 21)<div class="m">Direct Takayama→airport over the mountains isn't reliably next-day; the Nagoya hop makes the airport hand-off safe</div></div></div>
+      </div>
+      <div class="card" style="border-left:4px solid var(--gold)">
+        <h3>👵👴 Sally & Albert — your luggage</h3>
+        <p class="sub">Only <b>one</b> of your two cases fits in the car at any time (the boot is full with the family's bags + shopping). So the other one always travels by Yamato courier — you'll never carry both.</p>
+        <div class="line"><span class="k">Flying in</span><div class="v">Bring <b>2 cases, packed light</b> (or 1 each). Cathay = 1 checked bag each, so you have 2 between you — see baggage card below</div></div>
+        <div class="line"><span class="k">Dec 18</span><div class="v"><b>If a case is already full</b> at Takayama (e.g. shopping from the Hida week): forward it that morning from <b>Yamato Takayama Tonya Center</b> → the Nagoya apartment. Keep the lighter one in the car</div></div>
+        <div class="line"><span class="k">Dec 21</span><div class="v"><b>If you fill up in Nagoya instead</b> (Osu / Meieki shopping): forward from the <b>Sakae Yamato centre</b> → Centrair airport, collect Dec 22 at the 2F counter</div></div>
+        <div class="line"><span class="k">Rule of thumb</span><div class="v">Whichever case is fuller goes by courier; the emptier one rides in the car. Ask Si Qi — she'll add yours to the same drop-off</div></div>
+        <div class="line"><span class="k">Keep on you</span><div class="v">Passports, medicines, one change of clothes, chargers — in your cabin bag, never in a forwarded case</div></div>
+      </div>
+      <div class="card">
+        <h3>✈️ Cathay baggage — how strict?</h3>
+        <p class="sub">Cathay is fully <b>piece-based</b> (they retired the weight-pool system in 2023). It's the number of bags that's capped, each with its own weight limit — not a shared total.</p>
+        <div class="line"><span class="k">Your fare</span><div class="v"><b>Economy Light = 1 checked bag per person</b>, up to <b>23kg</b> each<div class="m">7 of you = 7 checked bags total. Each bag also ≤158cm (L+W+H)</div></div></div>
+        <div class="line"><span class="k">Cabin</span><div class="v">1 carry-on ≤7kg (56×36×23cm) + 1 personal item each</div></div>
+        <div class="line"><span class="k">How strict</span><div class="v"><b>The 23kg per-bag cap is enforced at check-in</b> — bags are weighed. Piece count is strict too (a 2nd checked bag = paid excess)<div class="m">Cabin 7kg is spot-checked when flights are full; usually lenient but don't push a bulging bag</div></div></div>
+        <div class="line"><span class="k">Squeeze plan</span><div class="v">Your "2 medium into 2 large" works fine — <b>1 large case each, kept under 23kg</b>. Weigh at the villa before forwarding (bring a luggage scale)</div></div>
+        <div class="line"><span class="k">If over</span><div class="v">Excess is ~USD 60–150 per extra/overweight piece — cheaper to redistribute weight between bags at the airport, or ship overflow home by courier</div></div>
+      </div>
+      <div class="card">
+        <h3>🧺 Wash plan — every 3 days, stop Dec 20</h3>
+        <p class="sub">Villa + apartment both have washers. No need to fly home clean — the last dirty load becomes what you forward.</p>
+        <div class="line"><span class="k">Dec 14</span><div class="v">Shiro House washer — first load</div></div>
+        <div class="line"><span class="k">Dec 17</span><div class="v">Shiro House — load before checkout</div></div>
+        <div class="line"><span class="k">Dec 20</span><div class="v"><b>Last wash</b> at the Nagoya apartment<div class="m">After this, let clothes pile up dirty — they become the 3 forwarded cases</div></div></div>
+      </div>
+      <div class="card">
+        <h3>🎒 Pack 4 days, wash every 3</h3>
+        <p class="sub">Adults + Nathaniel + Raphael. The extra day covers slow-drying items. Grandparents pack their own.</p>
+        <div class="line"><span class="k">Base</span><div class="v">5× underwear (one extra buffer day) · 3× thermal tops · 2× thermal bottoms</div></div>
+        <div class="line"><span class="k">Outer</span><div class="v">2–3× mid-layer tops · 2× pants (1 water-resistant) — pants re-worn many days</div></div>
+        <div class="line"><span class="k">Socks</span><div class="v"><b>Disposable socks</b> — pack a stack, wear-and-bin, no washing needed<div class="m">Plus 2× thick wool pairs kept for the Takasu snow day</div></div></div>
+        <div class="line"><span class="k">Warm</span><div class="v">Down jacket + fleece (worn, not packed) · beanie · neck warmer · waterproof gloves</div></div>
+        <div class="line"><span class="k">Elijah</span><div class="v">No underwear needed (full-time diapers) — but pack <b>5× spare clothing sets</b> for leaks and spills · 4× thermal tops · 3× thermal bottoms<div class="m">+2 full outfits packed separately in the day-bag for quick changes on the go · spare shoes · disposable socks</div></div></div>
+        <div class="line"><span class="k">Diapers</span><div class="v">Full-time use — bring <b>~10 from home</b> for arrival night + Day 1, then buy in Japan<div class="m">Japanese diapers (Merries/Moony) are excellent and cheap — buy a bulk pack at the Day 2 drugstore stop, then top up at any drugstore/konbini as you go. No need to pack a 13-day supply</div></div></div>
+        <div class="line"><span class="k">Buy there</span><div class="v">Diapers (bulk pack) + wipes + milk powder<div class="m">Sugi Drug / V-Drug on Day 2 · ~¥6,000–8,000 · restock as needed, sold everywhere</div></div></div>
+      </div>
+      <div class="card ck">
+        <h3>Booking checklist</h3>
+        <label><input type="checkbox" checked><span>✓ RDZ cancelled · Alphard confirmed (booking ref + PIN on file) · snow tyres + GPS + child seat incl. · IDPs ×2 (AA Singapore)</span></label>
+        <label><input type="checkbox"><span>⚠ Verify old 3-room Four Points bookings (refs on file) show CANCELLED — no email confirms it</span></label>
+        <label><input type="checkbox"><span>Shiro House villa ✓ booked (HMWW3YY2W4) — pay auto-charges 28 Nov; note free-cancel deadline 6 Dec</span></label>
+        <label><input type="checkbox" checked><span>Nagoya Airbnb ✓ booked and paid (HMT3MJBMNB) — note 2 parking spots for the Alphard</span></label>
+        <label><input type="checkbox"><span>Nov: snowboard lesson, Dec 14 at Takasu (English/private)</span></label>
+        <label><input type="checkbox"><span>Nov: book Dec 16 workshops — Sarubobo, bamboo lamp, washi/woodblock lamp (Takayama) · Sample Village Iwasaki, Dec 18 (Gujo) · Mino washi paper-making, Dec 18</span></label>
+        <label><input type="checkbox"><span>Nov: sushi reservations for 7 — Hikari (Dec 11, Inuyama) · Akazu (Dec 12, Takayama) · Arima (Dec 21, Kuwana, book well ahead — 5.0★ reservation-only)</span></label>
+        <label><input type="checkbox"><span>Late Nov: Hida strawberry-farm slot (Dec 16) + confirm Takasu snow-season opening</span></label>
+        <label><input type="checkbox"><span>Pack: disposable socks (stack) + 2 wool pairs each · soft duffels for the 2 in-car cases · ~10 diapers for arrival + Day 1, buy the rest in Japan</span></label>
+        <label><input type="checkbox"><span>In Japan: confirm Yamato Takayama Tonya Center + a Sakae Yamato centre hours before each forward</span></label>
+        <label><input type="checkbox"><span>Week before: Takasu opening status · confirm both Sunday mass times</span></label>
+        <label><input type="checkbox"><span>⚠ Japan's tax-free system changed 1 Nov 2026 — you now pay full price + tax at the till and claim the refund at an airport kiosk before check-in, not at the store. Keep EVERY tax-free receipt from the whole trip (cards, souvenirs, shopping) — needed at the Centrair kiosk on Dec 22/23</span></label>
+      </div>
+    </section>
+
+    <section class="view" id="view-spending">
+      <h2>Actual spending<span class="jp">実際の支出</span></h2>
+      <div class="card">
+        <h3>➕ Log an expense</h3>
+        <p class="sub">For use in Japan — saved on this phone/browser automatically as you go. Everyone logs on their own device, then use Export below to combine.</p>
+        <div class="spForm">
+          <input type="date" id="spDate" aria-label="Date">
+          <select id="spCat" aria-label="Category">
+            <option>Food</option>
+            <option>Snow &amp; activities</option>
+            <option>Transport &amp; fuel</option>
+            <option>Cards &amp; shopping</option>
+            <option>Souvenirs</option>
+            <option>Diapers &amp; baby</option>
+            <option>Lodging extras</option>
+            <option>Other</option>
+          </select>
+          <select id="spWho" aria-label="Self or shared">
+            <option value="shared">Shared (family)</option>
+            <option value="self">Self (personal)</option>
+          </select>
+          <select id="spPaidBy" aria-label="Paid by">
+            <option>Gabriel</option>
+            <option>Albert</option>
+            <option>ETC card</option>
+          </select>
+          <input type="number" id="spAmt" min="0" step="1" placeholder="¥ amount" aria-label="Amount in yen">
+          <input type="text" id="spNote" placeholder="Note (optional)" aria-label="Note" maxlength="80">
+          <button class="tbtn acc" id="spAdd" type="button">Add</button>
+        </div>
+      </div>
+      <div id="spToast" class="sp-toast" role="status" aria-live="polite"></div>
+      <div class="card">
+        <h3>📒 Logged so far</h3>
+        <div id="spRows"></div>
+        <div class="btot" style="padding-top:10px"><span>Shared (family) subtotal</span><span class="n" id="spSharedTotal" style="font-size:14px">¥0</span></div>
+        <div class="btot"><span>Self (personal) subtotal</span><span class="n" id="spSelfTotal" style="font-size:14px">¥0</span></div>
+        <div class="btot" style="border-top:1px dashed var(--line);margin-top:4px"><span>All logged spending</span><span class="n" id="spGrandTotal">¥0</span></div>
+        <p class="sub" style="margin-top:9px">¥10,000 ≈ S$90. This is separate from the on-the-ground <b>estimate</b> in the Budget tab — this tab is what you actually spent.</p>
+        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+          <button class="tbtn" id="spExport" type="button">📋 Export as text</button>
+          <button class="tbtn" id="spClear" type="button" style="border-color:var(--plum);color:var(--plum)">🗑 Clear all (this device)</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabbar" aria-label="Sections">
+  <div class="tabbar-in">
+    <button class="tab active" data-v="view-days"><span class="ic">🗓</span>Days</button>
+    <button class="tab" data-v="view-flights"><span class="ic">✈️</span>Flights</button>
+    <button class="tab" data-v="view-budget"><span class="ic">¥</span>Budget</button>
+    <button class="tab" data-v="view-logistics"><span class="ic">🧳</span>Logistics</button>
+    <button class="tab" data-v="view-spending"><span class="ic">💰</span>Spending</button>
+  </div>
+</nav>
+
+<script>
+/* ============================ SEED DATA ============================ */
+var WD = {"日":"Sun","月":"Mon","火":"Tue","水":"Wed","木":"Thu","金":"Fri","土":"Sat"};
+var DAYS = [
+{d:10,yb:"木",title:"Arrival night at Centrair",stay:"<b>Four Points by Sheraton Centrair</b> — booked ✓",stops:[
+ {t:"21:00",p:"Chubu Centrair International Airport",n:"Land T1 — immigration and bags. CX658 10:00→14:00 HKG, CX532 16:25→21:00 NGO",c:""},
+ {t:"22:15",p:"Four Points by Sheraton Nagoya Chubu International Airport",n:"Walk the connected deck, check in, sleep",c:"booked"}]},
+{d:11,yb:"金",title:"Up to Inuyama, then Shiro House",stay:"<b>SHIRO HOUSE</b> (designer villa) ×7 nights — 389-1 Nyūkawachō Machikata, Takayama · check-in 15:00 · conf HMWW3YY2W4 · host Nanami +81 90-5862-7733 · 4 free bikes · 8 guests max",stops:[
+ {t:"08:00",p:"Four Points by Sheraton Nagoya Chubu International Airport",n:"Breakfast; load all cases into the Alphard",c:""},
+ {t:"09:45",p:"Chubu Centrair International Airport",n:"Collect the rental Alphard, pick-up 10:00 (~1h15 to Inuyama)",c:"booked"},
+ {t:"10:30",p:"Inuyama Castle Town Alley",n:"Jokamachi stroll, snacks",c:"¥5,000"},
+ {t:"12:00",p:"Japan Monkey Park Inuyama",n:"🐒 Animal feeding for Elijah — monkey feeding + retro toddler rides. Open Fridays",c:"¥10,000"},
+ {t:"14:30",p:"Inuyama Castle",n:"Japan's oldest original wooden castle keep — river-bluff views",c:"¥2,000"},
+ {t:"16:00",p:"Inuyama Castle Town Alley",n:"Free browsing time before dinner — café stop, more jokamachi shops",c:"¥3,000"},
+ {t:"17:30",p:"光寿司 犬山",n:"🍣 Hikari Sushi — 43-year husband-and-wife counter, Inuyama's home-style pick. Book for 7",c:"¥20,000"},
+ {t:"19:00",p:"SHIRO HOUSE Takayama",n:"Drive on to the villa (~2h) — arrive late, straight to bed",c:""}]},
+{d:12,yb:"土",title:"Takayama old town",stay:"Base: SHIRO HOUSE (villa has a washer — first laundry load tonight)",stops:[
+ {t:"08:30",p:"Miyagawa Morning Market Takayama",n:"Drive ~15 min. Riverside morning market — pickles, sarubobo, snacks",c:""},
+ {t:"10:00",p:"Sanmachi Suji Takayama",n:"Old-town lanes: Hida beef sushi & skewers, sake shops",c:"¥8,000"},
+ {t:"12:30",p:"Takayama Jinya",n:"Historic government house + the market square out front",c:"¥1,000"},
+ {t:"14:30",p:"Ninja Experience Takayama",n:"Optional ninja activity/course",c:"¥3,000"},
+ {t:"16:00",p:"GIGO Takayama",n:"Arcade — claw machines and games for the boys",c:"¥3,000"},
+ {t:"18:00",p:"鮨あかず 高山",n:"🍣 Sushi Akazu — 4.9★ local counter, Hida-beef + nigiri family sets. Book for 7",c:"¥20,000"}]},
+{d:13,yb:"日",title:"Split: Mass (Albert & Sally) + Ninja/arcade → Shinhotaka & bears",stay:"Base: SHIRO HOUSE",stops:[
+ {t:"07:15",p:"SHIRO HOUSE Takayama",n:"Albert & Sally take the Alphard to Minokamo Church (~80 min) for 9:00 mass — drop everyone else in the old town on the way out",c:""},
+ {t:"09:00",p:"Ninja Experience Takayama",n:"While in-laws are at mass: ninja course for the boys, 2 min walk from Sanmachi old town",c:"¥3,000"},
+ {t:"10:15",p:"GIGO Takayama",n:"Arcade — short walk from Ninja Experience, old town is compact (worth confirming its exact address nearer the date)",c:"¥3,000"},
+ {t:"12:00",p:"Sanmachi Suji Takayama",n:"Albert & Sally rejoin after mass (~80 min back) — lunch together in the old town",c:"¥10,000"},
+ {t:"13:30",p:"新穂高ロープウェイ",n:"Drive ~1h. Shinhotaka Ropeway — snowy North Alps panorama from the deck",c:"¥3,400 ea"},
+ {t:"15:30",p:"奥飛騨クマ牧場",n:"Drive ~30 min. 🐻 Okuhida Bear Ranch — animal feeding via elevated feeding chute, very toddler-safe. Elijah's big animal day",c:"¥8,000"},
+ {t:"17:00",p:"平湯大滝",n:"Hirayu Waterfall — short walk if time allows; first to trim if the day's run late",c:""},
+ {t:"17:45",p:"SHIRO HOUSE Takayama",n:"Back to the villa; dinner in",c:"¥8,000"}]},
+{d:14,yb:"月",title:"Snow day at Takasu",stay:"Base: SHIRO HOUSE",stops:[
+ {t:"07:45",p:"Takasu Snow Park",n:"Drive ~1h from the villa. ♦ Pre-book the boys' snowboard lesson (English/private)",c:"¥7,000/skier"},
+ {t:"10:00",p:"Takasu Snow Park",n:"Boys' snowboard lesson; Elijah + grandparents + mum at the Kids Park (magic-carpet, sledding, indoor family room)",c:"¥5,000 ea"},
+ {t:"13:00",p:"Takasu Terrace",n:"Family gondola up for the view; free-ride the beginner runs",c:"¥6,500/¥3,800"},
+ {t:"16:00",p:"SHIRO HOUSE Takayama",n:"Back for a hot bath and an early dinner",c:"¥10,000"}]},
+{d:15,yb:"火",title:"Shirakawa-go Ogimachi",stay:"Base: SHIRO HOUSE · 🧺 wash load tonight",stops:[
+ {t:"10:00",p:"Shirakawa-go Ogimachi",n:"Drive ~1h. Gassho-zukuri snow village, Shiroyama viewpoint shuttle",c:"¥2,000"},
+ {t:"11:30",p:"Shirakawa-go Ogimachi",n:"Village wander, hoba-miso lunch, craft shops",c:"¥10,000"},
+ {t:"15:30",p:"SHIRO HOUSE Takayama",n:"Back to the villa; rest, dinner in",c:"¥8,000"}]},
+{d:16,yb:"水",title:"Hida-Furukawa + washi lamp workshop",stay:"Base: SHIRO HOUSE",stops:[
+ {t:"09:00",p:"Hida-Furukawa",n:"Drive ~20 min. Quiet canal town, white-walled storehouses, koi-filled waterways",c:""},
+ {t:"11:30",p:"Sanmachi Suji Takayama",n:"Lunch in the old town",c:"¥7,000"},
+ {t:"13:30",p:"飛騨高山 和紙照明教室",n:"Washi / woodblock lamp workshop — everyone makes one to take home",c:"¥6,000"},
+ {t:"15:30",p:"SHIRO HOUSE Takayama",n:"Free afternoon at the villa",c:""},
+ {t:"18:00",p:"SHIRO HOUSE Takayama",n:"Villa dinner",c:"¥8,000"}]},
+{d:17,yb:"木",title:"Free day — limestone cave + fruit-picking",stay:"Base: SHIRO HOUSE (last villa night · 🧺 final Hida wash) · checkout tomorrow 11:00",stops:[
+ {t:"09:30",p:"飛騨大鍾乳洞",n:"Hida Great Limestone Cave — Japan's highest show cave (900m alt.), 800m of formations; ~10 min from the villa",c:"¥1,100 ea"},
+ {t:"12:00",p:"飛騨高山 いちご狩り",n:"Hida strawberry/fruit picking — greenhouse-warm, all-you-can-eat (book the season/slot)",c:"¥14,000"},
+ {t:"15:00",p:"SHIRO HOUSE Takayama",n:"Back to pack; villa checkout is 11:00 tomorrow",c:""},
+ {t:"18:00",p:"SHIRO HOUSE Takayama",n:"Farewell-to-Hida dinner in; sort the 3 dirty-clothes cases to forward tomorrow AM + the 2 that ride in the car",c:"¥10,000"}]},
+{d:18,yb:"金",title:"Checkout Hida → Gujo Hachiman → Nagoya",stay:"<b>Nagoya Airbnb</b> ×4 nights — 456-0058 Rokuban-2 Chome-9, Atsuta Ward, Nagoya · check-in after 16:00 / out by 10:00 · conf HMT3MJBMNB · host Masanari +81 90-7957-8519 · 2 parking spots · 6-min walk to subway (direct to Sakae, no transfer)",stops:[
+ {t:"10:00",p:"ヤマト運輸 高山問屋センター",n:"Before checkout: drop the 3 dirty-clothes cases at Yamato Takayama Tonya Center → forwarded to the Nagoya apartment (8:00–20:00)",c:"¥7,500"},
+ {t:"11:00",p:"SHIRO HOUSE Takayama",n:"Villa checkout by 11:00; the 2 remaining cases + in-laws' ride in the car; drive ~2h to Gujo",c:""},
+ {t:"13:00",p:"Gujo Hachiman Castle",n:"Hilltop castle overlooking the town",c:"¥7,000"},
+ {t:"14:30",p:"Gujo Hachiman Castle Town Plaza",n:"Central plaza, snacks",c:""},
+ {t:"15:00",p:"Igawa Lane",n:"Crystal-clear canal lane with koi",c:""},
+ {t:"15:30",p:"Yanaka Lane",n:"Another scenic canal street",c:""},
+ {t:"16:00",p:"Sogi Spring",n:"One of Japan's top 100 water sources — drinkable spring water",c:""},
+ {t:"16:30",p:"Sample Village Iwasaki",n:"Food-replica making workshop (optional, book ahead)",c:"¥6,000"},
+ {t:"17:15",p:"美濃和紙の里会館",n:"🎨 Mino washi paper-making — everyone pulls their own postcards, ~30 min from Gujo en route to Nagoya",c:"¥6,000"},
+ {t:"18:45",p:"Nagoya Airbnb Atsuta Ward",n:"Drive on to Nagoya (~1h); check in after 16:00 — the 3 forwarded cases are waiting",c:"¥2,000"}]},
+{d:19,yb:"土",title:"Osu — Pokémon TCG hunting (light day)",stay:"Base: Nagoya Airbnb, Atsuta Ward · 🧺 wash tonight",stops:[
+ {t:"10:30",p:"Osu Shotengai Nagoya",n:"♦ First pass through the covered arcade — get the lay of the shops. 👵👴 Sally & Albert: the arcade itself is general shopping (clothing, antiques, homeware), not just card shops — browse at your own pace, meet back at the sushi spot",c:"cards"},
+ {t:"12:00",p:"Osu Shotengai Nagoya",n:"Street snacks, lunch",c:"¥8,000"},
+ {t:"14:00",p:"Top Card Nagoya Osu",n:"♦ Sealed + singles — English friendly (light browse, full crawl tomorrow)",c:"cards"}]},
+{d:20,yb:"日",title:"Mass at Nunoike + full Osu crawl",stay:"Base: Nagoya Airbnb, Atsuta Ward",stops:[
+ {t:"09:15",p:"カトリック布池教会",n:"Sunday mass at Nunoike Cathedral (Sts Peter & Paul, カトリック布池教会) — confirm the time",c:"offering"},
+ {t:"11:30",p:"Top Card Nagoya Osu",n:"♦ Full card crawl continues",c:"cards"},
+ {t:"13:00",p:"Vault Nagoya",n:"♦ Vintage + slabs (opens 13:00)",c:"cards"},
+ {t:"14:30",p:"Pokemon Center Nagoya PARCO",n:"♦ Exclusives + sealed product. 👵👴 Sally & Albert: Matsuzakaya Nagoya department store is right next door in the same Sakae block — general fashion + depachika food hall floors",c:""},
+ {t:"15:30",p:"第2アメ横ビル 大須",n:"DIY retro-console kit — ask はんだ付け不要 (no soldering); build night back at the apartment",c:"¥5,000"}]},
+{d:21,yb:"月",title:"AEON Kuwana + Nabana illumination",stay:"Base: Nagoya Airbnb, Atsuta Ward · 🧺 last wash tonight — after this, clothes pile up dirty for forwarding",stops:[
+ {t:"09:30",p:"ヤマト運輸 名古屋栄センター",n:"Before leaving: forward the 3 dirty-clothes cases → Centrair (collect Dec 22 at the 2F airport counter). Send before 18:00",c:"¥7,500"},
+ {t:"10:30",p:"AEON Mall Kuwana",n:"♦ Drive ~40 min. Shinseido TCG 3F + Gashapon 2F. 👵👴 Sally & Albert: plenty of general shopping in the same mall — fashion, homeware, supermarket floors — no need to go elsewhere for ~2h",c:""},
+ {t:"12:30",p:"すし有馬 桑名",n:"🍣 Sushi Arima — 5.0★ reservation-only counter, Kuwana's top pick. Book well ahead for 7",c:"¥25,000"},
+ {t:"17:00",p:"Nabana no Sato",n:"✨ Winter illumination — light tunnel + main show; ¥1,000 food voucher; dinner inside",c:"¥17,000"}]},
+{d:22,yb:"火",title:"Nagoya → airport",stay:"<b>Four Points by Sheraton Centrair</b> — booked ✓ (return the Alphard by 18:30 — earlier than before)",stops:[
+ {t:"10:00",p:"Nagoya Airbnb Atsuta Ward",n:"Checkout by 10:00 — last-minute packing",c:""},
+ {t:"11:00",p:"Sakae Nagoya",n:"Last-minute shopping (subway direct, no transfer from Atsuta)",c:"¥8,000"},
+ {t:"13:00",p:"JR Nagoya Takashimaya",n:"Omiyage sweep",c:"¥15,000"},
+ {t:"14:00",p:"ル・シュプレーム",n:"Le Supreme — independent Nagoya bakery (not a department-store counter), ~10 min drive from Meieki, known for its pastries. Stock up here for tomorrow's no-breakfast morning",c:"¥5,000"},
+ {t:"15:30",p:"Chubu Centrair International Airport",n:"Refuel + return the Alphard at the airport branch by 18:30",c:"¥3,000"},
+ {t:"16:30",p:"Four Points by Sheraton Nagoya Chubu International Airport",n:"Check in — collect the 3 forwarded cases at the 2F Yamato counter; repack for the flight",c:""},
+ {t:"18:00",p:"Chubu Centrair International Airport",n:"Dinner; kids down early. If the tax-refund kiosk in the departure lobby is already open this evening, worth walking over and doing it now (ask at the hotel desk or airport info) — otherwise do it tomorrow morning before check-in",c:"¥10,000"}]},
+{d:23,yb:"水",title:"Home",stay:"",stops:[
+ {t:"06:15",p:"Four Points by Sheraton Nagoya Chubu International Airport",n:"Wake, pack — no breakfast included this stay, grab something at the airport before check-in",c:""},
+ {t:"07:00",p:"Chubu Centrair International Airport",n:"Walk the deck to the T1 departure lobby — do the new tax-refund kiosk procedure BEFORE check-in: scan passport, show all receipts from the trip. GREEN = done in seconds; RED = take the goods to a customs counter for inspection (bring everything, keep consumables unopened) — budget extra time in case",c:""},
+ {t:"07:30",p:"Chubu Centrair International Airport",n:"Check in at T1",c:""},
+ {t:"09:35",p:"Chubu Centrair International Airport",n:"CX563 departs → HKG → SIN 20:10. おかえりなさい",c:""}]}
+];
+
+var BUDGET = [
+ ["Snow — lessons + rentals ×2 days", 130],
+ ["Activities & workshops (strawberries, washi, ropeway, Nabana)", 95],
+ ["Food incl. 4 sushi nights", 425],
+ ["Fuel, tolls, parking", 40],
+ ["Luggage forwarding (Yamato, several legs)", 25],
+ ["Diapers, milk powder, misc", 12]
+];
+var PREPAID = [
+ ["Flights — Cathay E2HTUJ (7 pax, paid)", 3702.20],
+ ["Shiro House villa — 7 nts (auto-charge 28 Nov)", 3280.47],
+ ["Nagoya Airbnb — 4 nts (paid)", 2022.67],
+ ["Four Points Centrair — Dec 10-11 (3 rooms, brekkie incl.)", 553.77],
+ ["Four Points Centrair — Dec 22-23 (3 rooms, no brekkie)", 446.46],
+ ["Alphard rental — carelife/Zy, Dec 11-22 (paid)", 1381.57]
+];
+var AT_RISK = [
+ ["Four Points Dec 10-11 — round 1, 3-room (verify cancelled)", 562.71],
+ ["Four Points Dec 22-23 — round 1, 3-room (verify cancelled)", 521.73]
+];
+
+/* ============================ HELPERS ============================ */
+function mapsUrl(q){ return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function yen(txt){
+  var m = String(txt).replace(/,/g,"").match(/¥\s*([0-9]+)/);
+  return m ? parseInt(m[1],10) : 0;
+}
+function fmt(n){ return n.toLocaleString("en-US"); }
+
+/* ============================ DAY RENDER ============================ */
+var strip = document.getElementById("strip"),
+    panel = document.getElementById("panel"),
+    current = 0;
+
+function dayTotal(i){
+  var t = 0;
+  DAYS[i].stops.forEach(function(s){ t += yen(s.c); });
+  return t;
+}
+
+function renderDay(i){
+  current = i;
+  Array.prototype.forEach.call(strip.children, function(b,j){ b.classList.toggle("active", j===i); });
+  var D = DAYS[i], tot = dayTotal(i);
+  var h = '<div class="dhead"><span class="dnum">DAY ' + (i<9?"0":"") + (i+1) + '</span>' +
+          '<span class="ddate">' + (WD[D.yb]||D.yb) + ' ' + D.yb + ' · ' + D.d + ' Dec 2026</span>' +
+          '<span class="dtot">' + (tot ? "day ≈ ¥" + fmt(tot) : "") + '</span></div>' +
+          '<h2 class="dtitle" contenteditable data-f="title" data-ph="Day title">' + esc(D.title) + '</h2>';
+
+  D.stops.forEach(function(s, k){
+    h += '<div class="stop" data-k="' + k + '">' +
+           '<div class="srow1">' +
+             '<span class="stime" contenteditable data-f="t" data-ph="--:--">' + esc(s.t) + '</span>' +
+             '<span class="splace" contenteditable data-f="p" data-ph="Place name">' + esc(s.p) + '</span>' +
+             '<span class="sbtns">' +
+               '<a class="mini map" href="' + mapsUrl(s.p) + '" target="_blank" rel="noopener" title="Open in Google Maps">📍</a>' +
+               '<button class="mini del" type="button" title="Delete this stop">✕</button>' +
+             '</span>' +
+           '</div>' +
+           '<div class="snote" contenteditable data-f="n" data-ph="What happens here">' + esc(s.n) + '</div>' +
+           '<span class="scost" contenteditable data-f="c" data-ph="cost">' + esc(s.c) + '</span>' +
+         '</div>';
+  });
+
+  h += '<button class="addstop" type="button" id="addStop">+ Add a stop to this day</button>';
+  if (D.stay) h += '<div class="staybox" contenteditable data-f="stay">' + D.stay + '</div>';
+  else h += '<div class="staybox" contenteditable data-f="stay" data-ph="Where you sleep tonight / notes"></div>';
+  h += '<button class="addstop" type="button" id="logExpenseBtn" style="margin-top:8px">💰 Log an expense for this day</button>';
+
+  panel.innerHTML = h;
+  var b = strip.children[i];
+  if (b) b.scrollIntoView({inline:"center", block:"nearest", behavior:"smooth"});
+}
+
+/* edits */
+panel.addEventListener("input", function(e){
+  var el = e.target, f = el.getAttribute("data-f");
+  if (!f) return;
+  var D = DAYS[current];
+  if (f === "title"){ D.title = el.textContent; return; }
+  if (f === "stay"){ D.stay = el.innerHTML; return; }
+  var wrap = el.closest(".stop");
+  if (!wrap) return;
+  var k = +wrap.getAttribute("data-k");
+  D.stops[k][f] = el.textContent;
+  if (f === "p"){
+    var a = wrap.querySelector("a.map");
+    if (a) a.href = mapsUrl(el.textContent);
+  }
+  if (f === "c"){
+    var tot = dayTotal(current), lab = panel.querySelector(".dtot");
+    if (lab) lab.textContent = tot ? "day ≈ ¥" + fmt(tot) : "";
+  }
+});
+
+panel.addEventListener("click", function(e){
+  var del = e.target.closest(".mini.del");
+  if (del){
+    var wrap = del.closest(".stop"), k = +wrap.getAttribute("data-k");
+    DAYS[current].stops.splice(k,1);
+    renderDay(current);
+    return;
+  }
+  if (e.target.id === "addStop"){
+    DAYS[current].stops.push({t:"", p:"", n:"", c:""});
+    renderDay(current);
+    var fields = panel.querySelectorAll(".stop .stime");
+    if (fields.length) fields[fields.length-1].focus();
+  }
+  if (e.target.id === "logExpenseBtn"){
+    var D = DAYS[current];
+    var iso = "2026-12-" + (D.d<10?"0":"") + D.d;
+    document.querySelector('.tab[data-v="view-spending"]').click();
+    var spDate = document.getElementById("spDate");
+    if (spDate) spDate.value = iso;
+    var spAmt = document.getElementById("spAmt");
+    if (spAmt) spAmt.focus();
+  }
+});
+
+/* paste as plain text so formatting never leaks in */
+panel.addEventListener("paste", function(e){
+  if (!e.target.isContentEditable) return;
+  e.preventDefault();
+  var txt = (e.clipboardData || window.clipboardData).getData("text");
+  document.execCommand("insertText", false, txt);
+});
+
+/* ============================ DATE STRIP ============================ */
+var today = new Date();
+var inTrip = today.getFullYear()===2026 && today.getMonth()===11 && today.getDate()>=10 && today.getDate()<=23;
+DAYS.forEach(function(D,i){
+  var b = document.createElement("button");
+  b.className = "dbtn" + (inTrip && today.getDate()===D.d ? " today" : "");
+  b.type = "button";
+  b.innerHTML = '<span class="yb">' + (WD[D.yb]||D.yb) + '</span><span class="dd">' + D.d + '</span>';
+  b.addEventListener("click", function(){ renderDay(i); });
+  strip.appendChild(b);
+});
+
+/* day picker for the search box */
+var qday = document.getElementById("qday");
+DAYS.forEach(function(D,i){
+  var o = document.createElement("option");
+  o.value = i; o.textContent = (WD[D.yb]||D.yb) + " " + D.d + " Dec";
+  qday.appendChild(o);
+});
+
+/* ============================ MAP SEARCH ============================ */
+var q = document.getElementById("q");
+function runSearch(){
+  var v = q.value.trim();
+  if (v) window.open(mapsUrl(v), "_blank", "noopener");
+}
+document.getElementById("btnQ").addEventListener("click", runSearch);
+q.addEventListener("keydown", function(e){ if (e.key === "Enter") runSearch(); });
+document.getElementById("btnQAdd").addEventListener("click", function(){
+  var v = q.value.trim(); if (!v) { q.focus(); return; }
+  var i = +qday.value;
+  DAYS[i].stops.push({t:"", p:v, n:"", c:""});
+  q.value = "";
+  document.querySelector('.tab[data-v="view-days"]').click();
+  renderDay(i);
+  var last = panel.querySelectorAll(".stop");
+  if (last.length) last[last.length-1].scrollIntoView({block:"center", behavior:"smooth"});
+});
+
+/* ============================ BUDGET ============================ */
+var YEN_RATE = 0.009; // ¥ to S$ (¥1000 ≈ S$9)
+
+var arows = document.getElementById("atRiskRows");
+var riskSGD = 0;
+AT_RISK.forEach(function(row){
+  riskSGD += row[1];
+  var d = document.createElement("div");
+  d.className = "brow";
+  d.innerHTML = '<span class="bl">' + row[0] + '</span>' +
+                '<span class="mono" style="width:auto;background:none;border:none;text-align:right;color:var(--plum)">S$' +
+                row[1].toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>';
+  arows.appendChild(d);
+});
+document.getElementById("risktotal").textContent = "S$" + riskSGD.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+var prows = document.getElementById("prepaidRows");
+var prepaidSGD = 0;
+PREPAID.forEach(function(row){
+  prepaidSGD += row[1];
+  var d = document.createElement("div");
+  d.className = "brow";
+  d.innerHTML = '<span class="bl">' + row[0] + '</span>' +
+                '<span class="mono" style="width:auto;background:none;border:none;text-align:right">S$' +
+                row[1].toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>';
+  prows.appendChild(d);
+});
+document.getElementById("ptotal").textContent = "S$" + prepaidSGD.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+var brows = document.getElementById("budgetRows");
+BUDGET.forEach(function(row, i){
+  var d = document.createElement("div");
+  d.className = "brow";
+  d.innerHTML = '<span class="bl">' + row[0] + '</span>' +
+                '<input class="bv" type="number" min="0" step="5" value="' + row[1] + '" aria-label="' + row[0] + ' in thousands of yen">';
+  brows.appendChild(d);
+});
+function budgetTotal(){
+  var t = 0;
+  brows.querySelectorAll(".bv").forEach(function(inp){ t += (+inp.value || 0); });
+  var yenSGD = Math.round(t*1000*YEN_RATE);
+  document.getElementById("btotal").textContent = "¥" + fmt(t) + ",000  ·  ≈ S$" + fmt(yenSGD);
+  document.getElementById("grandtotal").textContent =
+    "≈ S$" + fmt(Math.round(prepaidSGD + yenSGD));
+}
+brows.addEventListener("input", budgetTotal);
+budgetTotal();
+
+/* ============================ SEAT MAPS ============================ */
+var PEOPLE = {SQ:"Si Qi", GA:"Gabriel", AL:"Albert", SA:"Sally", NA:"Nathaniel", RA:"Raphael", EL:"Elijah"};
+var A330 = ["A","C","|","D","E","F","G","|","H","K"], A321 = ["A","B","C","|","H","J","K"];
+var FL = [
+ ["CX658","SIN → HKG","A330-300 · 2-4-2 · Thu 10 Dec — ⚠ reassigned 11 Sep",A330,[39,40,41],
+  {"39D":"NA","39E":"SQ","39F":"RA","39G":"GA","40C":"EL","41A":"SA","41C":"AL"},
+  "⚠ Elijah now alone at 40C, split from Mum — fix at check-in or call Cathay"],
+ ["CX532","HKG → NGO","A321neo · 3-3 · Thu 10 Dec",A321,[32,33,34,35],
+  {"32A":"RA","32B":"NA","32C":"GA","32H":"SQ","32J":"EL","35H":"AL","35J":"SA"},
+  "Five fill row 32 · grandparents three rows back"],
+ ["CX563","NGO → HKG","A321neo · 3-3 · Wed 23 Dec",A321,[32,33,34,35],
+  {"32A":"RA","32B":"NA","32C":"GA","32H":"SQ","32J":"EL","35H":"AL","35J":"SA"},
+  "Identical to the outbound A321 leg"],
+ ["CX657","HKG → SIN","A330-300 · 2-4-2 · Wed 23 Dec",A330,[41,42],
+  {"41A":"SA","41C":"AL","41H":"EL","41K":"SQ","42A":"NA","42C":"RA","42H":"GA"},
+  "Mum + Elijah paired · Dad directly behind at 42H"]
+];
+(function(){
+  var out = ['<div class="sm-legend">'];
+  Object.keys(PEOPLE).forEach(function(k){
+    out.push('<span class="sm-key"><i class="p-' + k.toLowerCase() + '">' + k + '</i>' + PEOPLE[k] + '</span>');
+  });
+  out.push('</div>');
+  FL.forEach(function(f){
+    var code=f[0], route=f[1], sub=f[2], layout=f[3], rows=f[4], occ=f[5], note=f[6];
+    out.push('<div class="sm-card"><div class="sm-top"><b>' + code + '</b><span class="sm-route">' + route + '</span></div>');
+    out.push('<div class="sm-sub">' + sub + '</div><div class="sm-nose">front of aircraft ↑</div>');
+    out.push('<div class="sm-cabin sm-c' + (layout.length+1) + '"><span class="sm-rn"></span>');
+    layout.forEach(function(L){ out.push(L==="|" ? '<span class="sm-gap"></span>' : '<span class="sm-hd">' + L + '</span>'); });
+    rows.forEach(function(r){
+      out.push('<span class="sm-rn">' + r + '</span>');
+      layout.forEach(function(L){
+        if (L === "|"){ out.push('<span class="sm-gap"></span>'); return; }
+        var who = occ[r + L];
+        out.push(who
+          ? '<span class="sm-seat p-' + who.toLowerCase() + '" title="' + PEOPLE[who] + ' ' + r + L + '">' + who + '</span>'
+          : '<span class="sm-seat"></span>');
+      });
+    });
+    out.push('</div><p class="sm-note">' + note + '</p></div>');
+  });
+  document.getElementById("seatmaps").innerHTML = out.join("");
+})();
+
+/* ============================ TABS + THEME ============================ */
+document.querySelectorAll(".tab").forEach(function(t){
+  t.addEventListener("click", function(){
+    document.querySelectorAll(".tab").forEach(function(x){ x.classList.toggle("active", x===t); });
+    document.querySelectorAll(".view").forEach(function(v){ v.classList.toggle("active", v.id===t.dataset.v); });
+    var onDays = t.dataset.v === "view-days";
+    strip.style.display = onDays ? "" : "none";
+    document.querySelector(".msearch").style.display = onDays ? "" : "none";
+    window.scrollTo({top:0});
+  });
+});
+(function(){
+  var root = document.documentElement, btn = document.getElementById("themebtn");
+  function set(m){
+    if (m === "light"){ root.setAttribute("data-theme","light"); btn.textContent = "🌙"; }
+    else { root.removeAttribute("data-theme"); btn.textContent = "☀️"; }
+  }
+  set(window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  btn.addEventListener("click", function(){
+    set(root.getAttribute("data-theme") === "light" ? "dark" : "light");
+  });
+})();
+
+/* ============================ SAVE / LOAD / TEXT ============================ */
+var ioBox = document.getElementById("ioBox"),
+    ioText = document.getElementById("ioText"),
+    ioMsg = document.getElementById("ioMsg");
+
+function state(){
+  var b = [];
+  brows.querySelectorAll(".brow").forEach(function(r){
+    b.push([r.querySelector(".bl").textContent, +r.querySelector(".bv").value || 0]);
+  });
+  return JSON.stringify({v:1, saved:new Date().toISOString(), days:DAYS, budget:b}, null, 1);
+}
+
+document.getElementById("btnSave").addEventListener("click", function(){
+  var data = state();
+  try {
+    var blob = new Blob([data], {type:"application/json"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "nagoya-trip-plan.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+    ioMsg.textContent = "Saved as nagoya-trip-plan.json. If no download appeared, copy the text below and keep it somewhere safe.";
+  } catch (err){
+    ioMsg.textContent = "Download was blocked here — copy the text below and save it as a .json file.";
+  }
+  ioText.value = data;
+  ioBox.classList.add("open");
+});
+
+document.getElementById("btnLoad").addEventListener("click", function(){
+  document.getElementById("fileIn").click();
+});
+document.getElementById("fileIn").addEventListener("change", function(e){
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(){ applyData(r.result); };
+  r.readAsText(f);
+});
+
+function applyData(txt){
+  try {
+    var o = JSON.parse(txt);
+    if (!o.days || !o.days.length) throw new Error("no days");
+    DAYS = o.days;
+    if (o.budget){
+      var rows = brows.querySelectorAll(".brow");
+      o.budget.forEach(function(pair, i){
+        if (rows[i]){ rows[i].querySelector(".bl").textContent = pair[0]; rows[i].querySelector(".bv").value = pair[1]; }
+      });
+      budgetTotal();
+    }
+    renderDay(0);
+    ioMsg.textContent = "Loaded — saved " + (o.saved ? new Date(o.saved).toLocaleString() : "earlier") + ".";
+    ioBox.classList.add("open");
+    ioText.value = "";
+  } catch (err){
+    ioMsg.textContent = "That didn't look like a saved plan file.";
+    ioBox.classList.add("open");
+  }
+}
+document.getElementById("ioApply").addEventListener("click", function(){
+  if (ioText.value.trim()) applyData(ioText.value);
+});
+document.getElementById("ioCopy").addEventListener("click", function(){
+  ioText.select();
+  try { document.execCommand("copy"); ioMsg.textContent = "Copied."; } catch(e){ ioMsg.textContent = "Select the text and copy manually."; }
+});
+document.getElementById("ioClose").addEventListener("click", function(){ ioBox.classList.remove("open"); });
+
+document.getElementById("btnText").addEventListener("click", function(){
+  var lines = ["NAGOYA & HIDA — 10-23 Dec 2026 (Cathay E2HTUJ, 7 pax)", ""];
+  DAYS.forEach(function(D,i){
+    lines.push("== DAY " + (i+1) + " · " + (WD[D.yb]||D.yb) + " " + D.yb + " " + D.d + " Dec — " + D.title);
+    D.stops.forEach(function(s){
+      lines.push("  " + (s.t || "  ") + "  " + s.p + (s.c ? "  [" + s.c + "]" : ""));
+      if (s.n) lines.push("        " + s.n);
+    });
+    if (D.stay) lines.push("  STAY/NOTE: " + D.stay.replace(/<[^>]+>/g,""));
+    lines.push("");
+  });
+  ioText.value = lines.join("\n");
+  ioMsg.textContent = "Plain text for WhatsApp or email — tap Copy.";
+  ioBox.classList.add("open");
+});
+
+document.getElementById("btnPrint").addEventListener("click", function(){ window.print(); });
+
+/* ============================ SPENDING TRACKER ============================ */
+(function(){
+  var LS_KEY = "nagoyaSpending2026";
+  var rowsEl = document.getElementById("spRows");
+  var dateEl = document.getElementById("spDate"), catEl = document.getElementById("spCat"),
+      whoEl = document.getElementById("spWho"), paidByEl = document.getElementById("spPaidBy"),
+      amtEl = document.getElementById("spAmt"), noteEl = document.getElementById("spNote"),
+      toastEl = document.getElementById("spToast");
+  var entries = [];
+  var toastTimer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2200);
+  }
+
+  function load(){
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      entries = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(entries)) entries = [];
+    } catch (e){ entries = []; }
+  }
+  function save(){
+    try { localStorage.setItem(LS_KEY, JSON.stringify(entries)); } catch (e){ /* storage unavailable — keep working in-memory */ }
+  }
+  function todayStr(){
+    var t = new Date(); var p = function(n){ return (n<10?"0":"")+n; };
+    return t.getFullYear()+"-"+p(t.getMonth()+1)+"-"+p(t.getDate());
+  }
+  function fmtDate(iso){
+    if (!iso) return "";
+    var parts = iso.split("-"); if (parts.length !== 3) return iso;
+    var d = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+  }
+
+  function render(){
+    if (!entries.length){
+      rowsEl.innerHTML = '<div class="sp-empty">Nothing logged yet — add your first expense above.</div>';
+    } else {
+      var sorted = entries.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||"") || a.ts - b.ts; });
+      rowsEl.innerHTML = sorted.map(function(e){
+        return '<div class="sp-row" data-id="' + e.id + '">' +
+          '<div class="sp-main">' +
+            '<div class="sp-top">' +
+              '<span class="sp-date">' + esc(fmtDate(e.date)) + '</span>' +
+              '<span class="sp-cat">' + esc(e.cat) + '</span>' +
+              '<span class="sp-badge ' + (e.who==="self"?"self":"shared") + '">' + (e.who==="self"?"Self":"Shared") + '</span>' +
+              '<span class="sp-paidby">' + esc(e.paidBy || "—") + '</span>' +
+            '</div>' +
+            (e.note ? '<div class="sp-note">' + esc(e.note) + '</div>' : '') +
+          '</div>' +
+          '<span class="sp-amt">¥' + fmt(e.amt) + '</span>' +
+          '<button class="mini del" type="button" title="Delete this entry">✕</button>' +
+        '</div>';
+      }).join("");
+    }
+    var shared = 0, self = 0;
+    entries.forEach(function(e){ if (e.who === "self") self += e.amt; else shared += e.amt; });
+    document.getElementById("spSharedTotal").textContent = "¥" + fmt(shared);
+    document.getElementById("spSelfTotal").textContent = "¥" + fmt(self);
+    document.getElementById("spGrandTotal").textContent = "¥" + fmt(shared + self) + "  ·  ≈ S$" + fmt(Math.round((shared+self)*YEN_RATE));
+  }
+
+  document.getElementById("spAdd").addEventListener("click", function(){
+    var amt = Math.round(+amtEl.value || 0);
+    if (!amt){ amtEl.focus(); return; }
+    var entry = {
+      id: Date.now() + "-" + Math.random().toString(36).slice(2,7),
+      ts: Date.now(),
+      date: dateEl.value || todayStr(),
+      cat: catEl.value,
+      who: whoEl.value,
+      paidBy: paidByEl.value,
+      amt: amt,
+      note: (noteEl.value || "").trim()
+    };
+    entries.push(entry);
+    save(); render();
+    toast("Added ¥" + fmt(amt) + " — " + entry.cat + " (" + entry.paidBy + ")");
+    amtEl.value = ""; noteEl.value = ""; amtEl.focus();
+  });
+
+  rowsEl.addEventListener("click", function(e){
+    var btn = e.target.closest(".del"); if (!btn) return;
+    var row = btn.closest(".sp-row"); if (!row) return;
+    entries = entries.filter(function(en){ return en.id !== row.dataset.id; });
+    save(); render();
+  });
+
+  document.getElementById("spExport").addEventListener("click", function(){
+    var sorted = entries.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||"") || a.ts - b.ts; });
+    var lines = ["NAGOYA & HIDA — actual spending log", ""];
+    sorted.forEach(function(e){
+      lines.push(fmtDate(e.date) + "  ¥" + fmt(e.amt) + "  [" + (e.who==="self"?"self":"shared") + "]  " + e.cat + "  paid by " + (e.paidBy || "—") + (e.note ? "  — " + e.note : ""));
+    });
+    var shared = 0, self = 0;
+    entries.forEach(function(e){ if (e.who === "self") self += e.amt; else shared += e.amt; });
+    lines.push("", "Shared subtotal: ¥" + fmt(shared), "Self subtotal: ¥" + fmt(self), "Total: ¥" + fmt(shared+self) + " (≈ S$" + fmt(Math.round((shared+self)*YEN_RATE)) + ")");
+    ioText.value = lines.join("\n");
+    ioMsg.textContent = entries.length ? "Spending log as text — tap Copy, then paste/merge into one person's tracker." : "Nothing logged yet.";
+    ioBox.classList.add("open");
+  });
+
+  document.getElementById("spClear").addEventListener("click", function(){
+    if (!entries.length) return;
+    if (!confirm("Clear all " + entries.length + " logged entries on this device? This can't be undone.")) return;
+    entries = []; save(); render();
+  });
+
+  dateEl.value = todayStr();
+  load(); render();
+})();
+
+/* boot */
+renderDay(inTrip ? Math.max(0, DAYS.findIndex(function(D){ return D.d === today.getDate(); })) : 0);
+</script>
+</body>
+</html>
