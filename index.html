@@ -1,8 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Nagoya & Hida · Trip Planner (editable) · Dec 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -222,8 +217,6 @@ html[data-theme="light"] .p-el{background:#2F8F4E;border-color:#2F8F4E!important
   .stop,.card,.sm-card{break-inside:avoid;border-color:#ccc}
 }
 </style>
-</head>
-<body>
 <div class="app">
 
   <header class="top">
@@ -303,11 +296,11 @@ html[data-theme="light"] .p-el{background:#2F8F4E;border-color:#2F8F4E!important
 
     <section class="view" id="view-budget">
       <h2>Budget<span class="jp">予算</span></h2>
-      <div class="card" style="border-left:4px solid var(--plum)">
-        <h3 style="font-family:var(--maru);font-size:14px;color:var(--plum);margin-bottom:3px">⚠ Duplicate booking — money at risk</h3>
-        <p class="sub">Not counted in the trip total below — this is paid but shouldn't exist. Cancel it.</p>
+      <div class="card" style="border-left:4px solid var(--gold)">
+        <h3 style="font-family:var(--maru);font-size:14px;color:var(--gold);margin-bottom:3px">✓ No duplicate bookings</h3>
+        <p class="sub">Confirmed 19 Oct via the Trip.com app's Upcoming bookings — only 3 live: 2 Four Points stays (Dec 10–11, Dec 22–23) + the Alphard. The old round-1 duplicates are gone (no cancellation email ever arrived, but they no longer show on the account).</p>
         <div id="atRiskRows"></div>
-        <div class="btot" style="color:var(--plum)"><span>At risk</span><span class="n" id="risktotal" style="color:var(--plum)">—</span></div>
+        <div class="btot" style="display:none"><span>At risk</span><span class="n" id="risktotal">—</span></div>
       </div>
       <div class="card">
         <h3 style="font-family:var(--maru);font-size:14px;color:var(--gold);margin-bottom:3px">Already booked & paid (SGD)</h3>
@@ -344,7 +337,7 @@ html[data-theme="light"] .p-el{background:#2F8F4E;border-color:#2F8F4E!important
         <h3>🏠 Booked stays</h3>
         <div class="line"><span class="k">Dec 10–11</span><div class="v"><b>Four Points by Sheraton Centrair</b> ✓ 3 rooms, breakfast incl.<div class="m">S$553.77 total · confirmation on file · PIN on file · Trip.com booking on file · guests Sally + Si Qi + Gabriel</div></div></div>
         <div class="line"><span class="k">Dec 22–23</span><div class="v"><b>Four Points by Sheraton Centrair</b> ✓ 3 rooms, <b>no breakfast</b><div class="m">S$446.46 total · confirmation on file · PIN on file · Trip.com booking on file · guests Sally + Si Qi + Gabriel</div></div></div>
-        <div class="line"><span class="k">⚠ Verify</span><div class="v">Round 2 (2-room) is confirmed cancelled by email (18 Oct) — round 1 (3-room) is still unconfirmed<div class="m">Check Trip.com that round 1 (booking refs on file) shows CANCELLED — otherwise you have 6 rooms/night, not 3</div></div></div>
+        <div class="line"><span class="k">✓ Checked</span><div class="v">No duplicate bookings — Trip.com app confirms only these 3 rooms/night, both rounds of old duplicates are gone<div class="m">Round 2 (2-room) cancelled by email 18 Oct; round 1 (3-room, refs on file) has no cancellation email but no longer shows under Upcoming bookings (checked 19 Oct)</div></div></div>
         <div class="line"><span class="k">Dec 11–18</span><div class="v"><b>SHIRO HOUSE</b> — designer villa, Takayama ✓<div class="m">389-1 Nyūkawachō Machikata · check-in 15:00 / out 11:00 · 7 nights · SGD 3,280.47 · conf HMWW3YY2W4 · host Nanami +81 90-5862-7733 · 4 free bikes · free cancel to 6 Dec</div></div></div>
         <div class="line"><span class="k">Dec 18–22</span><div class="v"><b>Nagoya Airbnb</b> — Atsuta Ward ✓ paid<div class="m">456-0058 Rokuban-2 Chome-9, Atsuta Ward, Nagoya · check-in after 16:00 / out by 10:00 · 4 nights · SGD 2,022.67 (paid) · conf HMT3MJBMNB · host Masanari +81 90-7957-8519 · 2 parking spots · 6-min walk to subway, no transfer to Sakae</div></div></div>
         <span class="tbtn" style="margin-top:11px;opacity:.6;cursor:default">📄 Hotel + car vouchers PDF — in the file sent to you, not hosted publicly</span>
@@ -402,7 +395,7 @@ html[data-theme="light"] .p-el{background:#2F8F4E;border-color:#2F8F4E!important
       <div class="card ck">
         <h3>Booking checklist</h3>
         <label><input type="checkbox" checked><span>✓ RDZ cancelled · Alphard confirmed (booking ref + PIN on file) · snow tyres + GPS + child seat incl. · IDPs ×2 (AA Singapore)</span></label>
-        <label><input type="checkbox"><span>⚠ Verify old 3-room Four Points bookings (refs on file) show CANCELLED — no email confirms it</span></label>
+        <label><input type="checkbox" checked><span>✓ No duplicate Four Points bookings — Trip.com app (19 Oct) shows only the 2 live stays, old round-1 (refs on file) no longer on the account</span></label>
         <label><input type="checkbox"><span>Shiro House villa ✓ booked (HMWW3YY2W4) — pay auto-charges 28 Nov; note free-cancel deadline 6 Dec</span></label>
         <label><input type="checkbox" checked><span>Nagoya Airbnb ✓ booked and paid (HMT3MJBMNB) — note 2 parking spots for the Alphard</span></label>
         <label><input type="checkbox"><span>Nov: snowboard lesson, Dec 14 at Takasu (English/private)</span></label>
@@ -583,10 +576,7 @@ var PREPAID = [
  ["Four Points Centrair — Dec 22-23 (3 rooms, no brekkie)", 446.46],
  ["Alphard rental — carelife/Zy, Dec 11-22 (paid)", 1381.57]
 ];
-var AT_RISK = [
- ["Four Points Dec 10-11 — round 1, 3-room (verify cancelled)", 562.71],
- ["Four Points Dec 22-23 — round 1, 3-room (verify cancelled)", 521.73]
-];
+var AT_RISK = [];
 
 /* ============================ HELPERS ============================ */
 function mapsUrl(q){ return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q); }
@@ -1057,5 +1047,3 @@ document.getElementById("btnPrint").addEventListener("click", function(){ window
 /* boot */
 renderDay(inTrip ? Math.max(0, DAYS.findIndex(function(D){ return D.d === today.getDate(); })) : 0);
 </script>
-</body>
-</html>
